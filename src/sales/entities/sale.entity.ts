@@ -5,6 +5,7 @@ export class Sale {
   id_user: number;
   id_subsidiary: number;
   id_client: number;
+  id_order: number;
 
   sale_code: string;
 

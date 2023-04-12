@@ -1,14 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { limitRequest } from '../constants/request.constants';
 import { ProductsSalesService } from '../products_sales/products_sales.service';
+import ProductsSalesModel from '../products_sales/products_sales.model';
+import ProductsModel from '../products/products.model';
+import { OrdersService } from '../orders/orders.service';
+import { generateSequentialNumber } from '../helpers/handleSerial.helpers';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { UpdateSaleDto } from './dto/update-sale.dto';
 import SalesModel from './sales.model';
-import ProductsSalesModel from 'src/products_sales/products_sales.model';
-import { ProductsModule } from 'src/products/products.module';
-import ProductsModel from 'src/products/products.model';
-import { generateSequentialNumber } from 'src/helpers/handleSerial.helpers';
+import { OrderStatusE } from 'src/orders/entities/order.entity';
 
 @Injectable()
 export class SalesService {
@@ -16,6 +17,7 @@ export class SalesService {
     @InjectModel(SalesModel)
     private readonly salesModel: typeof SalesModel,
     private readonly productsSalesService: ProductsSalesService,
+    private readonly ordersService: OrdersService,
   ) {}
 
   async create(createSaleDto: CreateSaleDto) {
@@ -32,7 +34,33 @@ export class SalesService {
       id_sale: created.dataValues.id,
     }));
 
-    await this.productsSalesService.upsertProductsSale(productsSales);
+    const productsSaleSaved =
+      await this.productsSalesService.upsertProductsSale(productsSales);
+
+    if (!productsSaleSaved) {
+      await this.cancelSale(created.dataValues.id);
+
+      throw new HttpException(
+        'Error al guardar productos de la venta. Reporte este error',
+        HttpStatus.CONFLICT,
+      );
+    }
+
+    if (createSaleDto.id_order) {
+      const updateStatusOrder = await this.ordersService.changeStatusOrder(
+        OrderStatusE.completed,
+        createSaleDto.id_order,
+      );
+
+      if (!updateStatusOrder) {
+        await this.cancelSale(created.dataValues.id);
+
+        throw new HttpException(
+          'Error al actualizar estado de la orden. Reporte este error',
+          HttpStatus.CONFLICT,
+        );
+      }
+    }
 
     return created;
   }

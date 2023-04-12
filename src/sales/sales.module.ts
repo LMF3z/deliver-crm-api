@@ -12,12 +12,14 @@ import { SalesService } from './sales.service';
 import { SalesValidationMiddleware } from './sales.middleware';
 import { SalesController } from './sales.controller';
 import SalesModel from './sales.model';
+import { OrdersModule } from 'src/orders/orders.module';
 
 @Module({
   imports: [
     SequelizeModule.forFeature([SalesModel]),
     ProductsSalesModule,
     ProvidersModule,
+    OrdersModule,
   ],
   controllers: [SalesController],
   providers: [SalesService, HttpCustomService],

@@ -25,6 +25,13 @@ class SalesModel extends Model<Sale> {
   id_client: number;
 
   @Column({
+    type: DataType.INTEGER,
+    allowNull: true,
+    defaultValue: null,
+  })
+  id_order: number;
+
+  @Column({
     type: DataType.STRING,
   })
   sale_code: string;

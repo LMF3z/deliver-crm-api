@@ -6,6 +6,7 @@ export class CreateSaleDto {
   id_user: number;
   id_subsidiary: number;
   id_client: number;
+  id_order?: number;
   sale_code: string;
   total_payment: number;
   rate_dollars: number;
