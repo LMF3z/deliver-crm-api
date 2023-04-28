@@ -27,8 +27,15 @@ export class ProductsController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UsersRolesE.SUPER_ADMIN, UsersRolesE.ADMIN)
   @Post()
-  create(@Body() createProductDto: CreateProductDto): Promise<ProductsModel> {
-    return this.productsService.create(createProductDto);
+  async create(
+    @Body() createProductDto: CreateProductDto,
+  ): Promise<{ message: string; data: ProductsModel }> {
+    const saved = await this.productsService.create(createProductDto);
+
+    return {
+      message: 'Producto registrado exitisamente.',
+      data: saved,
+    };
   }
 
   @UseGuards(AuthGuard, RolesGuard)
@@ -53,7 +60,7 @@ export class ProductsController {
 
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UsersRolesE.SUPER_ADMIN, UsersRolesE.ADMIN)
-  @Get('search')
+  @Post('search')
   searchProducts(
     @Query('id_company', ParseIntPipe) id_company: number,
     @Query('offset', ParseIntPipe) offset: number,
@@ -76,17 +83,28 @@ export class ProductsController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UsersRolesE.SUPER_ADMIN, UsersRolesE.ADMIN, UsersRolesE.CASHIER)
   @Patch(':id')
-  update(
+  async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateProductDto: UpdateProductDto,
-  ): Promise<number> {
-    return this.productsService.update(id, updateProductDto);
+  ): Promise<{ message: string; affectedRows: number }> {
+    const updated = await this.productsService.update(id, updateProductDto);
+    return {
+      message: 'Producto actualizado exitosamente.',
+      affectedRows: updated,
+    };
   }
 
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UsersRolesE.SUPER_ADMIN, UsersRolesE.ADMIN, UsersRolesE.CASHIER)
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number): Promise<number> {
-    return this.productsService.remove(id);
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<{ message: string; affectedRows: number }> {
+    const deleted = await this.productsService.remove(id);
+
+    return {
+      message: 'producto eliminado exitosamente.',
+      affectedRows: deleted,
+    };
   }
 }

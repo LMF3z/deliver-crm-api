@@ -17,6 +17,7 @@ import { AuthGuard } from '../auth/auth.guard';
 import { Roles } from '../constants/roles.decorator';
 import { UsersRolesE } from '../entities/userRoles.entity';
 import { RolesGuard } from '../auth/roles.guard';
+import UsersModel from './users.model';
 
 @Controller('users')
 export class UsersController {
@@ -25,17 +26,27 @@ export class UsersController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UsersRolesE.SUPER_ADMIN, UsersRolesE.ADMIN)
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.createNewUser(createUserDto);
+  async create(
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<{ message: string; data: UsersModel }> {
+    const created = await this.usersService.createNewUser(createUserDto);
+
+    return {
+      message: 'Usuario creado exitosamente',
+      data: created,
+    };
   }
 
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UsersRolesE.SUPER_ADMIN, UsersRolesE.ADMIN)
-  @Get('all')
+  @Get()
   findAll(
     @Query('id_company', ParseIntPipe) id_company: number,
     @Query('offset', ParseIntPipe) offset: number,
-  ) {
+  ): Promise<{
+    rows: UsersModel[];
+    count: number;
+  }> {
     return this.usersService.findAll(id_company, offset);
   }
 
@@ -49,17 +60,27 @@ export class UsersController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UsersRolesE.SUPER_ADMIN, UsersRolesE.ADMIN)
   @Patch(':id')
-  update(
+  async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
-  ) {
-    return this.usersService.update(id, updateUserDto);
+  ): Promise<{ message: string; affectedRows: number }> {
+    const updated = await this.usersService.update(id, updateUserDto);
+    return {
+      message: 'Usuario actualizado exitosamente.',
+      affectedRows: updated,
+    };
   }
 
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UsersRolesE.SUPER_ADMIN, UsersRolesE.ADMIN)
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.remove(id);
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<{ message: string; affectedRows: number }> {
+    const deleted = await this.usersService.remove(id);
+    return {
+      message: 'Usuario eliminado exitosamente.',
+      affectedRows: deleted,
+    };
   }
 }

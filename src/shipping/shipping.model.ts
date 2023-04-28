@@ -1,4 +1,5 @@
 import {
+  BelongsTo,
   BelongsToMany,
   Column,
   DataType,
@@ -19,6 +20,7 @@ class ShippingModel extends Model<Shipping> {
   })
   id_company: number;
 
+  @ForeignKey(() => CompaniesSubsidiariesModel)
   @Column({
     type: DataType.INTEGER,
   })
@@ -40,6 +42,9 @@ class ShippingModel extends Model<Shipping> {
     defaultValue: false,
   })
   cancelled: boolean;
+
+  @BelongsTo(() => CompaniesSubsidiariesModel)
+  subsidiary?: CompaniesSubsidiariesModel;
 
   @HasMany(() => ProductsShippingModel)
   products_shipping: ProductsShippingModel[];

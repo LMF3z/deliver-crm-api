@@ -7,9 +7,11 @@ export class Auth {
 }
 
 export interface LoginCompanyResponseI extends Company {
+  id_company: number;
   token: string;
 }
 
 export interface LoginUserResponseI extends User {
+  id_company: number;
   token: string;
 }

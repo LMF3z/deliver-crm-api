@@ -1,7 +1,7 @@
 import {
   TypeCompanyDocumentT,
   TypeUsersRolesT,
-} from 'src/entities/userRoles.entity';
+} from '../../entities/userRoles.entity';
 
 export class Company {
   id?: number;

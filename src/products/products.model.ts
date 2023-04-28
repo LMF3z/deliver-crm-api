@@ -1,4 +1,13 @@
-import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
+import {
+  AfterFind,
+  BeforeFind,
+  BeforeFindAfterExpandIncludeAll,
+  Column,
+  DataType,
+  HasMany,
+  Model,
+  Table,
+} from 'sequelize-typescript';
 import { Product, ProductTypesE } from './entities/product.entity';
 
 @Table({ tableName: 'products', paranoid: true, timestamps: true })
@@ -65,13 +74,19 @@ class ProductsModel extends Model<Product> {
   @Column({
     type: DataType.STRING,
   })
-  images: string[];
+  images: string;
 
   @Column({
     type: DataType.BOOLEAN,
     defaultValue: true,
   })
   is_active: boolean;
+
+  // @AfterFind
+  // static makeArrayOfImages(instance: ProductsModel[]) {
+  //   const images = instance.map((ins) => Array.from(ins.images));
+  //   console.log('instance ------------>', images.pop());
+  // }
 }
 
 export default ProductsModel;

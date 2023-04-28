@@ -1,1 +1,1 @@
-export const limitRequest = 20;
+export const limitRequest = 2;

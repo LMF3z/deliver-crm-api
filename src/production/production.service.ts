@@ -5,6 +5,7 @@ import { CreateProductionDto } from './dto/create-production.dto';
 import { UpdateProductionDto } from './dto/update-production.dto';
 import ProductionModel from './production.model';
 import { ProductsService } from 'src/products/products.service';
+import ProductsModel from 'src/products/products.model';
 
 @Injectable()
 export class ProductionService {
@@ -37,6 +38,12 @@ export class ProductionService {
       where: {
         id_company,
       },
+      include: [
+        {
+          model: ProductsModel,
+          as: 'product',
+        },
+      ],
       offset,
       limit: limitRequest,
     });
@@ -48,6 +55,12 @@ export class ProductionService {
       where: {
         id,
       },
+      include: [
+        {
+          model: ProductsModel,
+          as: 'product',
+        },
+      ],
     });
   }
 
@@ -67,16 +80,16 @@ export class ProductionService {
   async remove(id: number): Promise<number> {
     const productionStock = await this.findOne(id);
 
+    await this.productsService.removeFromStock(
+      productionStock.dataValues.id_product,
+      productionStock.dataValues.amount,
+    );
+
     const deleted = await this.productionModel.destroy({
       where: {
         id,
       },
     });
-
-    await this.productsService.removeFromStock(
-      productionStock.dataValues.id_product,
-      productionStock.dataValues.amount,
-    );
 
     return deleted;
   }

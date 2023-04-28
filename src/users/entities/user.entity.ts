@@ -12,7 +12,7 @@ export class User {
   type_document: string;
   document: number;
   mobile_phone: string;
-  role: TypeUsersRolesT;
+  roles: TypeUsersRolesT;
   createdAt?: Date;
   updatedAt?: Date;
   deletedAt?: Date;

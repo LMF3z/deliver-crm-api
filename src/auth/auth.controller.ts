@@ -13,8 +13,17 @@ export class AuthController {
   @Post('login')
   async login(
     @Body() dataLogin: Auth,
-  ): Promise<LoginCompanyResponseI | LoginUserResponseI> {
+  ): Promise<{
+    message: string;
+    data: LoginCompanyResponseI | LoginUserResponseI;
+  }> {
     const company = await this.authService.login(dataLogin);
-    return company;
+
+    const data = {
+      message: 'Inicio exitoso.',
+      data: company,
+    };
+
+    return data;
   }
 }

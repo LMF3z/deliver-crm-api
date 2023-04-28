@@ -51,6 +51,7 @@ export class AuthService {
 
     const data = {
       ...company.dataValues,
+      id_company: company.dataValues.id,
       token,
     };
 
@@ -59,6 +60,12 @@ export class AuthService {
 
   async loginUser(dataLogin: Auth): Promise<LoginUserResponseI> {
     const user = await this.usersService.findOneByEmail(dataLogin.email);
+
+    if (!user)
+      throw new HttpException(
+        'Error en correo o contraseña',
+        HttpStatus.UNAUTHORIZED,
+      );
 
     const isValidPassword = comparePassword(
       dataLogin.password,
@@ -73,10 +80,10 @@ export class AuthService {
 
     const payload = {
       id: user.id,
-      id_company: user.id,
+      id_company: user.id_company,
       id_subsidiaries: user.id_subsidiaries,
       email: user.email,
-      roles: user.role,
+      roles: user.roles,
     };
 
     const token = this.jwtService.sign(payload);

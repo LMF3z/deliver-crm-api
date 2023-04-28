@@ -4,10 +4,12 @@ import { ProductsShippingModule } from '../products_shipping/products_shipping.m
 import { ShippingService } from './shipping.service';
 import { ShippingController } from './shipping.controller';
 import ShippingModel from './shipping.model';
+import { ProductsModule } from 'src/products/products.module';
 
 @Module({
   imports: [
     SequelizeModule.forFeature([ShippingModel]),
+    ProductsModule,
     ProductsShippingModule,
   ],
   controllers: [ShippingController],

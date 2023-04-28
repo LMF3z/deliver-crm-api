@@ -2,8 +2,8 @@ import {
   Controller,
   Get,
   Post,
-  Body,
   Patch,
+  Body,
   Param,
   Delete,
   UseGuards,
@@ -18,7 +18,9 @@ import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../constants/roles.decorator';
 import { UsersRolesE } from '../entities/userRoles.entity';
 import { CreateShippingDto } from './dto/create-shipping.dto';
+import ShippingModel from './shipping.model';
 import { UpdateShippingDto } from './dto/update-shipping.dto';
+import { Shipping } from './entities/shipping.entity';
 
 @Controller('shipping')
 export class ShippingController {
@@ -27,14 +29,35 @@ export class ShippingController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UsersRolesE.SUPER_ADMIN, UsersRolesE.ADMIN)
   @Post()
-  create(@Body() createShippingDto: CreateShippingDto) {
+  async create(
+    @Body() createShippingDto: CreateShippingDto,
+  ): Promise<{ message: string; data: ShippingModel }> {
     if (createShippingDto.products_shipping.length <= 0)
       throw new HttpException(
         'Debe seleccionar, al menos, un producto',
         HttpStatus.BAD_REQUEST,
       );
 
-    return this.shippingService.createShipping(createShippingDto);
+    if (
+      createShippingDto.products_shipping.some(
+        (prod) => prod.price > prod.product?.price!,
+      ) ||
+      createShippingDto.products_shipping.some(
+        (prod) => prod.stock > prod.product?.stock!,
+      )
+    ) {
+      throw new HttpException(
+        'Precio y stock no puede ser mayor al del producto seleccionado.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const saved = await this.shippingService.createShipping(createShippingDto);
+
+    return {
+      message: 'Envio registrado exitosamente.',
+      data: saved,
+    };
   }
 
   @UseGuards(AuthGuard, RolesGuard)
@@ -43,7 +66,7 @@ export class ShippingController {
   findAll(
     @Query('id_company', ParseIntPipe) id_company: number,
     @Query('offset', ParseIntPipe) offset: number,
-  ) {
+  ): Promise<{ rows: ShippingModel[]; count: number }> {
     return this.shippingService.findAllShipping(id_company, offset);
   }
 
@@ -54,14 +77,22 @@ export class ShippingController {
     return this.shippingService.findOneShipping(id);
   }
 
+  // Solo se pueden actualizar los estados de los shipping
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UsersRolesE.SUPER_ADMIN, UsersRolesE.ADMIN)
-  @Patch(':id')
-  update(
+  @Patch('/update-status/:id')
+  async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateShippingDto: UpdateShippingDto,
-  ) {
-    return this.shippingService.updateShipping(id, updateShippingDto);
+    @Body() updateShippingDto: Pick<Shipping, 'status' | 'id'>,
+  ): Promise<{ message: string; affectedRows: number }> {
+    const updated = await this.shippingService.updateShippingStatus(
+      id,
+      updateShippingDto,
+    );
+    return {
+      message: 'Estatus actualizado exitosamente.',
+      affectedRows: updated,
+    };
   }
 
   @UseGuards(AuthGuard, RolesGuard)

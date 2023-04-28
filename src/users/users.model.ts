@@ -61,7 +61,7 @@ class UsersModel extends Model<User> {
     type: DataType.STRING,
     defaultValue: UsersRolesE.CASHIER,
   })
-  role: string;
+  roles: string;
 }
 
 export default UsersModel;

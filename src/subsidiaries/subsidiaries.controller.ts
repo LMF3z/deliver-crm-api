@@ -26,10 +26,15 @@ export class SubsidiariesController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UsersRolesE.SUPER_ADMIN, UsersRolesE.ADMIN)
   @Post()
-  create(
+  async create(
     @Body() createSubsidiaryDto: CreateSubsidiaryDto,
-  ): Promise<CompaniesSubsidiariesModel> {
-    return this.subsidiariesService.create(createSubsidiaryDto);
+  ): Promise<{ message: string; data: CompaniesSubsidiariesModel }> {
+    const created = await this.subsidiariesService.create(createSubsidiaryDto);
+
+    return {
+      message: 'Sucursal registrada exitosamente',
+      data: created,
+    };
   }
 
   @UseGuards(AuthGuard, RolesGuard)
@@ -54,17 +59,31 @@ export class SubsidiariesController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UsersRolesE.SUPER_ADMIN, UsersRolesE.ADMIN, UsersRolesE.CASHIER)
   @Patch(':id')
-  update(
+  async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateSubsidiaryDto: UpdateSubsidiaryDto,
-  ): Promise<number> {
-    return this.subsidiariesService.update(id, updateSubsidiaryDto);
+  ): Promise<{ message: string; affectedRows: number }> {
+    const updated = await this.subsidiariesService.update(
+      id,
+      updateSubsidiaryDto,
+    );
+    return {
+      message: 'Sucursal actualizada exitosamente',
+      affectedRows: updated,
+    };
   }
 
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UsersRolesE.SUPER_ADMIN, UsersRolesE.ADMIN, UsersRolesE.CASHIER)
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number): Promise<number> {
-    return this.subsidiariesService.remove(id);
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<{ message: string; affectedRows: number }> {
+    const deleted = await this.subsidiariesService.remove(id);
+
+    return {
+      message: 'Sucursal eliminada exitosamente',
+      affectedRows: deleted,
+    };
   }
 }

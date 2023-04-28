@@ -1,3 +1,5 @@
+import ProductsModel from '../../products/products.model';
+
 export class Production {
   id?: number;
   id_company: number;
@@ -5,4 +7,6 @@ export class Production {
   amount: number;
   description: string;
   date_created: Date;
+
+  product: ProductsModel;
 }
