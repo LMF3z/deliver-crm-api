@@ -71,12 +71,18 @@ export class ClientsService {
     offset: number,
     query: string,
   ): Promise<{ rows: ClientsModel[]; count: number }> {
+    if (query === '') {
+      const clientsList = await this.findAllClients(id_company, offset);
+
+      return clientsList;
+    }
+
     if (!Number.isNaN(Number(query))) {
       const clientsList = await this.clientsModel.findAndCountAll({
         where: {
           id_company,
           document: {
-            [Op.like]: `${Number(query)}%`,
+            [Op.like]: `%${Number(query)}%`,
           },
         },
         offset,

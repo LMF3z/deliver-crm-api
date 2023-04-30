@@ -17,6 +17,7 @@ import { Roles } from '../constants/roles.decorator';
 import { ClientsService } from './clients.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
+import ClientsModel from './clients.model';
 
 @Controller('clients')
 export class ClientsController {
@@ -25,8 +26,15 @@ export class ClientsController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UsersRolesE.SUPER_ADMIN, UsersRolesE.ADMIN)
   @Post()
-  create(@Body() createClientDto: CreateClientDto) {
-    return this.clientsService.createNewClient(createClientDto);
+  async create(
+    @Body() createClientDto: CreateClientDto,
+  ): Promise<{ message: string; data: ClientsModel }> {
+    const created = await this.clientsService.createNewClient(createClientDto);
+
+    return {
+      message: 'Cliente creado exitosamente.',
+      data: created,
+    };
   }
 
   @UseGuards(AuthGuard, RolesGuard)
@@ -36,7 +44,7 @@ export class ClientsController {
     @Query('id_company', ParseIntPipe) id_company: number,
     @Query('offset', ParseIntPipe) offset: number,
     @Query('query') query: string,
-  ) {
+  ): Promise<{ rows: ClientsModel[]; count: number }> {
     return this.clientsService.findClientsByQuery(id_company, offset, query);
   }
 
@@ -60,17 +68,27 @@ export class ClientsController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UsersRolesE.SUPER_ADMIN, UsersRolesE.ADMIN)
   @Patch(':id')
-  update(
+  async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateClientDto: UpdateClientDto,
-  ) {
-    return this.clientsService.updateClient(id, updateClientDto);
+  ): Promise<{ message: string; affectedRows: number }> {
+    const updated = await this.clientsService.updateClient(id, updateClientDto);
+    return {
+      message: 'Cliente actualizado exitosamente.',
+      affectedRows: updated,
+    };
   }
 
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UsersRolesE.SUPER_ADMIN, UsersRolesE.ADMIN)
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.clientsService.removeClient(id);
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<{ message: string; affectedRows: number }> {
+    const deleted = await this.clientsService.removeClient(id);
+    return {
+      message: 'Cliente eliminado exitosamente.',
+      affectedRows: deleted,
+    };
   }
 }
